@@ -1,5 +1,5 @@
 # Render Deployment Configuration
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 # Set working directory
 WORKDIR /app
@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libicu-dev \
     zip \
     unzip \
     sqlite3 \
@@ -22,8 +23,8 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd zip
+# Install PHP extensions (including intl)
+RUN docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd zip intl
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -32,7 +33,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . /app
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
 
 # Create SQLite database file
 RUN touch database/database.sqlite
