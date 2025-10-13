@@ -48,9 +48,6 @@ COPY .env.example .env
 # Generate application key
 RUN php artisan key:generate
 
-# Set APP_URL for production (will be overridden by Render env var)
-RUN sed -i 's|APP_URL=.*|APP_URL=${APP_URL:-http://localhost}|g' .env
-
 # Run database migrations and seeders
 RUN php artisan migrate --force
 RUN php artisan db:seed --force
@@ -61,7 +58,13 @@ RUN npm install && npm run build
 # Publish Filament assets
 RUN php artisan filament:assets
 
-# Optimize for production
+# Optimize for production (clear old cache first)
+RUN php artisan config:clear || true
+RUN php artisan route:clear || true
+RUN php artisan view:clear || true
+RUN php artisan cache:clear || true
+
+# Now cache for production
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache

@@ -10,13 +10,17 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_URL
-        sync: false
+        value: https://promotion-management-eybk.onrender.com
       - key: DB_CONNECTION
         value: sqlite
       - key: SESSION_DRIVER
         value: file
       - key: SESSION_SECURE_COOKIE
         value: true
+      - key: SESSION_DOMAIN
+        value: .onrender.com
+      - key: SESSION_SAME_SITE
+        value: lax
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION
