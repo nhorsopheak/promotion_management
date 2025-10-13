@@ -1,89 +1,110 @@
 # 🚀 Kravanh-POS Deployment Guide
 
-## Railway Free Hosting Deployment
+## ⚠️ Railway Trial Expired - Alternative Options
 
-### Prerequisites
-- GitHub account
-- Railway account (free at https://railway.app)
-
-### Step 1: Prepare Your Codebase
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
-
-### Step 2: Deploy to Railway
-
-1. **Connect to Railway**
-   - Go to [railway.app](https://railway.app)
-   - Sign up/login with your GitHub account
-   - Click "New Project"
-   - Choose "Deploy from GitHub repo"
-   - Search and select your repository
-
-2. **Configure Environment**
-   - Railway will automatically detect your Dockerfile
-   - Set environment variables in Railway dashboard:
-     ```
-     APP_URL=https://your-app-name.railway.app
-     APP_KEY=base64:y7c9dmrOkBWKnFWa4ys5aPjSJPpuX8OZnixYCu8cx5Y=
-     ```
-
-3. **Deploy**
-   - Click "Deploy"
-   - Wait for build to complete (usually 5-10 minutes)
-   - Your app will be live at `https://your-app-name.railway.app`
-
-### Step 3: Access Your Application
-
-- **Admin Panel**: `https://your-app-name.railway.app`
-- **Login Credentials**:
-  - Email: `admin@example.com`
-  - Password: `password`
-
-### Features Included
-- ✅ SQLite database (no external DB needed)
-- ✅ File-based sessions and cache
-- ✅ Production-optimized settings
-- ✅ Admin panel with promotion management
-- ✅ Sample data pre-loaded
-
-### Free Tier Limits
-- 512 MB RAM
-- 1 GB storage
-- 1 CPU
-- Suitable for development/demo purposes
-
-### Troubleshooting
-
-**Build fails?**
-- Check Railway build logs
-- Ensure all dependencies are in `composer.json`
-- Verify PHP extensions in Dockerfile
-
-**App not loading?**
-- Check Railway service logs
-- Verify APP_URL in environment variables
-- Ensure database migrations ran successfully
-
-**Need more resources?**
-- Upgrade to Railway Pro ($5/month)
-- Or deploy to Render, Fly.io, or other platforms
+Since your Railway trial has expired, here are **free alternatives** that support Laravel + SQLite:
 
 ---
 
-## Hosting Platform Comparison
+## 🥇 Render (Recommended Alternative)
 
-| Platform | Free Tier | PHP Support | SQLite Support | Ease of Use | Recommended |
-|----------|-----------|-------------|----------------|-------------|-------------|
-| **Railway** | ✅ 512MB RAM, 1GB storage | ✅ Full | ✅ Yes | ⭐⭐⭐⭐⭐ | ✅ Yes |
-| **Render** | ✅ 750 hours/month | ✅ Full | ✅ Yes | ⭐⭐⭐⭐ | ✅ Yes |
-| **Fly.io** | ✅ Free tier available | ✅ Full | ✅ Yes | ⭐⭐⭐⭐ | ✅ Yes |
-| **Firebase** | ❌ No free PHP hosting | ⚠️ Limited | ⚠️ Complex | ⭐⭐ | ❌ No |
-| **Heroku** | ❌ Requires PostgreSQL | ✅ Full | ❌ No | ⭐⭐⭐ | ❌ No |
+### Free Tier: 750 hours/month (persistent storage included)
+
+### Step 1: Deploy to Render
+1. **Sign up:** Go to [render.com](https://render.com) and create account
+2. **Connect GitHub:** Link your GitHub account
+3. **Create Web Service:**
+   - Click "New" → "Web Service"
+   - Connect your `nhorsopheak/promotion_management` repository
+   - **Runtime:** `Docker`
+   - **Dockerfile Path:** `./Dockerfile.render`
+   - Click "Create Web Service"
+
+### Step 2: Configuration
+Render will auto-detect your `render.yaml` configuration. The service will:
+- ✅ Build with Docker
+- ✅ Install dependencies
+- ✅ Run migrations and seeders
+- ✅ Start Laravel server
+
+### Step 3: Access Your App
+- **URL:** `https://your-app-name.onrender.com`
+- **Admin Panel:** Same URL (Filament is at root)
+- **Credentials:** `admin@example.com` / `password`
+
+---
+
+## 🥈 Fly.io (Alternative)
+
+### Free Tier: Some free credits + pay-as-you-go
+
+### Step 1: Install Fly CLI
+```bash
+curl -L https://fly.io/install.sh | sh
+```
+
+### Step 2: Deploy
+```bash
+fly launch
+# Follow prompts, select Singapore region
+fly deploy
+```
+
+### Step 3: Access
+- **URL:** `https://your-app-name.fly.dev`
+- Fly.io auto-configures everything from `fly.toml`
+
+---
+
+## Hosting Platform Comparison (Free Tiers)
+
+| Platform | Free Hours/Month | Storage | SQLite Support | Ease of Setup |
+|----------|------------------|---------|----------------|----------------|
+| **Render** ⭐⭐⭐⭐⭐ | 750 hours | ✅ Persistent | ✅ Full | ⭐⭐⭐⭐⭐ |
+| **Fly.io** ⭐⭐⭐⭐ | Limited credits | ✅ Persistent | ✅ Full | ⭐⭐⭐⭐ |
+| **Railway** ❌ | Trial expired | ❌ No free | ❌ No | ❌ N/A |
+
+---
+
+## Quick Deploy Commands
+
+### For Render:
+```bash
+# Just push to GitHub, then use Render web interface
+git add .
+git commit -m "Ready for Render deployment"
+git push origin main
+```
+
+### For Fly.io:
+```bash
+# Install CLI and deploy
+curl -L https://fly.io/install.sh | sh
+fly launch
+fly deploy
+```
+
+---
+
+## Troubleshooting
+
+### Render Issues:
+- **Build timeout:** Your app might take >15 minutes to build
+- **Memory limit:** Free tier has 512MB RAM limit
+- **Cold starts:** First request after inactivity takes ~10-30 seconds
+
+### Fly.io Issues:
+- **Region selection:** Choose Singapore (`sin`) for better performance
+- **Credits:** Monitor free credits usage
+
+### General Issues:
+- **Database:** SQLite file is created during build
+- **Assets:** Frontend assets are built automatically
+- **Environment:** Production settings are pre-configured
+
+---
+
+**Ready to deploy?** I recommend **Render** as it's the easiest alternative with persistent storage included! 🚀
 
 ---
 

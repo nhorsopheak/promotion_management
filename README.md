@@ -39,24 +39,22 @@ Visit `http://localhost:8000` for the admin panel.
 
 ## 🌐 Production Deployment
 
-### Free Hosting with Railway (Recommended)
+### ⚠️ Railway Trial Expired - Use Render Instead
 
-1. **Push your code to GitHub**
-2. **Deploy to Railway:**
-   - Go to [railway.app](https://railway.app)
-   - Create new project from your GitHub repository
-   - Railway auto-detects the Dockerfile
-   - Set `APP_URL` environment variable
-   - Deploy!
+Since Railway trials expire, **Render** is now the recommended free hosting:
 
-**Live demo will be available at:** `https://your-app-name.railway.app`
+1. **Sign up:** [render.com](https://render.com)
+2. **Connect:** Link your GitHub repository `nhorsopheak/promotion_management`
+3. **Deploy:** Create Web Service with Docker runtime
+4. **Use:** `Dockerfile.render` as the dockerfile path
+
+**Live demo will be available at:** `https://your-app-name.onrender.com`
 
 ### Alternative Free Hosting
 
-- **Railway** ⭐⭐⭐⭐⭐ - Easiest setup, full PHP support, SQLite ready
-- **Render** ⭐⭐⭐⭐ - Web service with persistent disk
-- **Fly.io** ⭐⭐⭐⭐ - Docker-based deployment
-- ~~**Firebase**~~ ❌ - Not suitable for Laravel/PHP applications
+- **Render** ⭐⭐⭐⭐⭐ - 750 hours/month, persistent storage, easiest setup
+- **Fly.io** ⭐⭐⭐⭐ - Free credits available, Docker deployment
+- ~~**Railway**~~ ❌ - Trial expired, no free tier available
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
