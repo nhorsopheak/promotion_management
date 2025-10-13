@@ -53,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                // VerifyCsrfToken::class, // Temporarily disabled for debugging
+                VerifyCsrfToken::class, // Re-enabled CSRF protection
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
