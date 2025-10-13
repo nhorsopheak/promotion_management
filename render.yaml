@@ -14,7 +14,7 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: SESSION_DRIVER
-        value: file
+        value: database
       - key: SESSION_SECURE_COOKIE
         value: true
       - key: SESSION_DOMAIN
