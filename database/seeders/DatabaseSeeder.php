@@ -46,7 +46,6 @@ class DatabaseSeeder extends Seeder
                 'name' => $categoryData['name'],
                 'slug' => $categoryData['slug'],
                 'description' => "Category for {$categoryData['name']}",
-                'is_active' => true,
                 'sort_order' => 0,
             ]);
         }
@@ -79,7 +78,6 @@ class DatabaseSeeder extends Seeder
                 'price' => $productData['price'],
                 'cost' => $productData['price'] * 0.6,
                 'stock_quantity' => rand(50, 200),
-                'is_active' => true,
                 'track_inventory' => true,
             ]);
         }
