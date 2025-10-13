@@ -38,9 +38,9 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader -
 # Create SQLite database file
 RUN touch database/database.sqlite
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache database
+# Set permissions (after all file operations)
+RUN chmod -R 775 storage bootstrap/cache public
+RUN chown -R www-data:www-data storage bootstrap/cache database public
 
 # Copy environment file
 COPY .env.example .env
@@ -54,6 +54,14 @@ RUN php artisan db:seed --force
 
 # Build assets
 RUN npm install && npm run build
+
+# Publish Filament assets
+RUN php artisan filament:assets
+
+# Optimize for production
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
 
 # Expose port
 EXPOSE $PORT
