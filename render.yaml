@@ -3,6 +3,7 @@ services:
     name: kravanh-pos
     runtime: docker
     dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /health
     envVars:
       - key: APP_ENV
         value: production

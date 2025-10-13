@@ -32,8 +32,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy existing application directory contents
 COPY . /app
 
-# Install PHP dependencies
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --ignore-platform-req=php --ignore-platform-req=ext-intl
+# Install PHP dependencies (optimized)
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-progress --prefer-dist --ignore-platform-req=php --ignore-platform-req=ext-intl
 
 # Create SQLite database file
 RUN touch database/database.sqlite
