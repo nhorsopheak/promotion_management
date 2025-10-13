@@ -18,9 +18,9 @@ services:
       - key: SESSION_SECURE_COOKIE
         value: true
       - key: SESSION_DOMAIN
-        value: .onrender.com
+        value: promotion-management-eybk.onrender.com
       - key: SESSION_SAME_SITE
-        value: lax
+        value: none
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION

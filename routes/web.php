@@ -22,7 +22,26 @@ Route::get('/debug-auth', function () {
         'session_data' => session()->all(),
         'intended_url' => session()->get('url.intended'),
         'previous_url' => url()->previous(),
+        'cookies' => request()->cookies->all(),
+        'auth_guard' => Auth::getDefaultDriver(),
     ]);
+});
+
+// Manual login test
+Route::get('/test-login', function () {
+    $user = \App\Models\User::where('email', 'admin@example.com')->first();
+
+    if ($user) {
+        Auth::login($user);
+        return response()->json([
+            'message' => 'Manual login successful',
+            'user' => Auth::user(),
+            'check' => Auth::check(),
+            'session_id' => session()->getId(),
+        ]);
+    }
+
+    return response()->json(['message' => 'User not found'], 404);
 });
 
 // Test admin access without Filament
