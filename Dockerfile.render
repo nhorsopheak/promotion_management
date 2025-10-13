@@ -48,6 +48,9 @@ COPY .env.example .env
 # Generate application key
 RUN php artisan key:generate
 
+# Set APP_URL for production (will be overridden by Render env var)
+RUN sed -i 's|APP_URL=.*|APP_URL=${APP_URL:-http://localhost}|g' .env
+
 # Run database migrations and seeders
 RUN php artisan migrate --force
 RUN php artisan db:seed --force
@@ -62,6 +65,10 @@ RUN php artisan filament:assets
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
+
+# Set final permissions
+RUN chmod -R 775 storage bootstrap/cache public
+RUN chown -R www-data:www-data storage bootstrap/cache database public
 
 # Expose port
 EXPOSE $PORT

@@ -9,10 +9,14 @@ services:
         value: production
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        sync: false
       - key: DB_CONNECTION
         value: sqlite
       - key: SESSION_DRIVER
         value: file
+      - key: SESSION_SECURE_COOKIE
+        value: true
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION
