@@ -14,13 +14,15 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: SESSION_DRIVER
-        value: database
+        value: file
       - key: SESSION_SECURE_COOKIE
         value: true
       - key: SESSION_DOMAIN
         value: promotion-management-eybk.onrender.com
       - key: SESSION_SAME_SITE
         value: none
+      - key: SESSION_HTTP_ONLY
+        value: true
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION

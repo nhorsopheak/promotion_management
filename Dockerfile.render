@@ -42,6 +42,12 @@ RUN touch database/database.sqlite
 RUN chmod -R 775 storage bootstrap/cache public
 RUN chown -R www-data:www-data storage bootstrap/cache database public
 
+# Set final permissions (ensure session directory is writable)
+RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs
+RUN touch storage/logs/laravel.log
+RUN chmod -R 777 storage bootstrap/cache public storage/framework/sessions
+RUN chown -R www-data:www-data storage bootstrap/cache database public storage/framework
+
 # Copy environment file
 COPY .env.example .env
 
@@ -70,7 +76,7 @@ RUN php artisan route:cache
 RUN php artisan view:cache
 
 # Set final permissions
-RUN chmod -R 775 storage bootstrap/cache public
+RUN chmod -R 777 storage bootstrap/cache public
 RUN chown -R www-data:www-data storage bootstrap/cache database public
 
 # Expose port
