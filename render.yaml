@@ -15,12 +15,14 @@ services:
         value: sqlite
       - key: SESSION_DRIVER
         value: file
+      - key: SESSION_LIFETIME
+        value: 120
       - key: SESSION_SECURE_COOKIE
-        value: true
+        value: false
       - key: SESSION_DOMAIN
-        value: promotion-management-eybk.onrender.com
+        value: null
       - key: SESSION_SAME_SITE
-        value: none
+        value: lax
       - key: SESSION_HTTP_ONLY
         value: true
       - key: CACHE_STORE
