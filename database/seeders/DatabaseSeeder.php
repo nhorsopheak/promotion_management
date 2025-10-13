@@ -18,19 +18,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin user
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-        ]);
+        // Create admin user directly (avoid factory issues)
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
-        // Create test user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-        ]);
+        // Create test user directly
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Create categories
         $categories = [
@@ -42,12 +48,14 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $categoryData) {
-            Category::create([
-                'name' => $categoryData['name'],
-                'slug' => $categoryData['slug'],
-                'description' => "Category for {$categoryData['name']}",
-                'sort_order' => 0,
-            ]);
+            Category::updateOrCreate(
+                ['slug' => $categoryData['slug']],
+                [
+                    'name' => $categoryData['name'],
+                    'description' => "Category for {$categoryData['name']}",
+                    'sort_order' => 0,
+                ]
+            );
         }
 
         // Create products
@@ -69,17 +77,19 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $productData) {
             $category = Category::where('name', $productData['category'])->first();
             
-            Product::create([
-                'name' => $productData['name'],
-                'slug' => Str::slug($productData['name']),
-                'sku' => $productData['sku'],
-                'description' => "High quality {$productData['name']}",
-                'category_id' => $category->id,
-                'price' => $productData['price'],
-                'cost' => $productData['price'] * 0.6,
-                'stock_quantity' => rand(50, 200),
-                'track_inventory' => true,
-            ]);
+            Product::updateOrCreate(
+                ['sku' => $productData['sku']],
+                [
+                    'name' => $productData['name'],
+                    'slug' => Str::slug($productData['name']),
+                    'description' => "High quality {$productData['name']}",
+                    'category_id' => $category->id,
+                    'price' => $productData['price'],
+                    'cost' => $productData['price'] * 0.6,
+                    'stock_quantity' => rand(50, 200),
+                    'track_inventory' => true,
+                ]
+            );
         }
 
         // Get categories and products for promotions
@@ -87,61 +97,67 @@ class DatabaseSeeder extends Seeder
         $skincareCategory = Category::where('name', 'Skincare')->first();
         
         // 1. Buy X Get Y Free - Clothing
-        Promotion::create([
-            'code' => 'BUY2GET1',
-            'name' => 'Buy 2 Get 1 Free - Clothing',
-            'description' => 'Buy any 2 clothing items and get 1 free! The cheapest item will be free.',
-            'type' => PromotionType::BUY_X_GET_Y_FREE->value,
-            'status' => PromotionStatus::ACTIVE->value,
-            'start_date' => now(),
-            'end_date' => now()->addMonth(),
-            'conditions' => [
-                'buy_quantity' => 2,
-                'get_quantity' => 1,
-                'apply_to_type' => 'specific_categories',
-                'apply_to_category_ids' => $clothingCategory->id,
-                'get_type' => 'cheapest',
-                'apply_to_cheapest' => true,
-            ],
-            'benefits' => [],
-        ]);
+        Promotion::updateOrCreate(
+            ['code' => 'BUY2GET1'],
+            [
+                'name' => 'Buy 2 Get 1 Free - Clothing',
+                'description' => 'Buy any 2 clothing items and get 1 free! The cheapest item will be free.',
+                'type' => PromotionType::BUY_X_GET_Y_FREE->value,
+                'status' => PromotionStatus::ACTIVE->value,
+                'start_date' => now(),
+                'end_date' => now()->addMonth(),
+                'conditions' => [
+                    'buy_quantity' => 2,
+                    'get_quantity' => 1,
+                    'apply_to_type' => 'specific_categories',
+                    'apply_to_category_ids' => $clothingCategory->id,
+                    'get_type' => 'cheapest',
+                    'apply_to_cheapest' => true,
+                ],
+                'benefits' => [],
+            ]
+        );
 
         // 2. Step Discount - All Products
-        Promotion::create([
-            'code' => 'STEP_DISCOUNT',
-            'name' => 'Step Discount - 2nd 20%, 3rd 30%, 5th 50%',
-            'description' => 'Get progressive discounts: 2nd item 20% off, 3rd item 30% off, 5th item 50% off',
-            'type' => PromotionType::STEP_DISCOUNT->value,
-            'status' => PromotionStatus::ACTIVE->value,
-            'start_date' => now(),
-            'end_date' => now()->addMonth(),
-            'conditions' => [
-                'discount_tiers' => [
-                    ['position' => 2, 'percentage' => 20],
-                    ['position' => 3, 'percentage' => 30],
-                    ['position' => 5, 'percentage' => 50],
+        Promotion::updateOrCreate(
+            ['code' => 'STEP_DISCOUNT'],
+            [
+                'name' => 'Step Discount - 2nd 20%, 3rd 30%, 5th 50%',
+                'description' => 'Get progressive discounts: 2nd item 20% off, 3rd item 30% off, 5th item 50% off',
+                'type' => PromotionType::STEP_DISCOUNT->value,
+                'status' => PromotionStatus::ACTIVE->value,
+                'start_date' => now(),
+                'end_date' => now()->addMonth(),
+                'conditions' => [
+                    'discount_tiers' => [
+                        ['position' => 2, 'percentage' => 20],
+                        ['position' => 3, 'percentage' => 30],
+                        ['position' => 5, 'percentage' => 50],
+                    ],
                 ],
-            ],
-            'benefits' => [],
-        ]);
+                'benefits' => [],
+            ]
+        );
 
         // 3. Fixed Price Bundle - Skincare
-        Promotion::create([
-            'code' => 'SKINCARE_BUNDLE',
-            'name' => 'Skincare Bundle - 3 for $30',
-            'description' => 'Buy any 3 skincare products for just $30! Discount split proportionally.',
-            'type' => PromotionType::FIXED_PRICE_BUNDLE->value,
-            'status' => PromotionStatus::ACTIVE->value,
-            'start_date' => now(),
-            'end_date' => now()->addMonth(),
-            'conditions' => [
-                'bundle_quantity' => 3,
-                'bundle_price' => 30.00,
-                'bundle_type' => 'specific_categories',
-                'eligible_category_ids' => $skincareCategory->id,
-            ],
-            'benefits' => [],
-        ]);
+        Promotion::updateOrCreate(
+            ['code' => 'SKINCARE_BUNDLE'],
+            [
+                'name' => 'Skincare Bundle - 3 for $30',
+                'description' => 'Buy any 3 skincare products for just $30! Discount split proportionally.',
+                'type' => PromotionType::FIXED_PRICE_BUNDLE->value,
+                'status' => PromotionStatus::ACTIVE->value,
+                'start_date' => now(),
+                'end_date' => now()->addMonth(),
+                'conditions' => [
+                    'bundle_quantity' => 3,
+                    'bundle_price' => 30.00,
+                    'bundle_type' => 'specific_categories',
+                    'eligible_category_ids' => $skincareCategory->id,
+                ],
+                'benefits' => [],
+            ]
+        );
 
         $this->command->info('Database seeded successfully!');
         $this->command->info('Admin: admin@example.com / password');
