@@ -1,0 +1,15 @@
+{
+  "code": "BUY2GET1DRINKS",
+  "name": "Buy 2 Drinks Get 1 Free",
+  "description": "Buy 2 drinks from the drinks category and get 1 free",
+  "type": "buy_x_get_y_free",
+  "status": "active",
+  "conditions": {
+    "buy_quantity": 2,
+    "get_quantity": 1,
+    "apply_to_type": "specific_categories",
+    "apply_to_category_ids": 3,
+    "get_type": "cheapest",
+    "apply_to_cheapest": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "code": "BUNDLE3SHIRTS",
+  "name": "3 Shirts for $99",
+  "description": "Buy 3 shirts for a fixed price of $99",
+  "type": "fixed_price_bundle",
+  "status": "active",
+  "conditions": {
+    "bundle_quantity": 3,
+    "bundle_price": 99.00,
+    "bundle_type": "specific_products",
+    "eligible_product_ids": 15
+  }
+}

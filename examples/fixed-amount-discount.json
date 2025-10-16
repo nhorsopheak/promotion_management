@@ -1,0 +1,12 @@
+{
+  "code": "SAVE5",
+  "name": "$5 Off",
+  "description": "Get $5 off on your purchase",
+  "type": "percentage_discount",
+  "status": "active",
+  "conditions": {
+    "discount_type": "fixed_amount",
+    "discount_value": 5.00,
+    "apply_to_type": "all"
+  }
+}

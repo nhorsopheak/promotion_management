@@ -1,0 +1,14 @@
+{
+  "code": "STEP50",
+  "name": "Step Discount - Up to 50% Off",
+  "description": "Get increasing discounts: 2nd item 20% off, 3rd item 30% off, 5th item 50% off",
+  "type": "step_discount",
+  "status": "active",
+  "conditions": {
+    "discount_tiers": [
+      {"position": 2, "percentage": 20},
+      {"position": 3, "percentage": 30},
+      {"position": 5, "percentage": 50}
+    ]
+  }
+}

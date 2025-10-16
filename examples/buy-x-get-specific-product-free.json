@@ -1,0 +1,14 @@
+{
+  "code": "BUY2GETWATER",
+  "name": "Buy 2 Get Water Free",
+  "description": "Buy any 2 items and get a free water bottle",
+  "type": "buy_x_get_y_free",
+  "status": "active",
+  "conditions": {
+    "buy_quantity": 2,
+    "get_quantity": 1,
+    "apply_to_type": "any",
+    "get_type": "specific_products",
+    "get_product_ids": 10
+  }
+}

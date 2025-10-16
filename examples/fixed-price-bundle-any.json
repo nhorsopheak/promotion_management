@@ -1,0 +1,12 @@
+{
+  "code": "BUNDLE99",
+  "name": "3 for $99",
+  "description": "Buy any 3 items for a fixed price of $99",
+  "type": "fixed_price_bundle",
+  "status": "active",
+  "conditions": {
+    "bundle_quantity": 3,
+    "bundle_price": 99.00,
+    "bundle_type": "any"
+  }
+}

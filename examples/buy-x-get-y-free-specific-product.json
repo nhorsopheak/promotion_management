@@ -1,0 +1,15 @@
+{
+  "code": "BUY2GET1COLA",
+  "name": "Buy 2 Colas Get 1 Free",
+  "description": "Buy 2 colas and get 1 free",
+  "type": "buy_x_get_y_free",
+  "status": "active",
+  "conditions": {
+    "buy_quantity": 2,
+    "get_quantity": 1,
+    "apply_to_type": "specific_products",
+    "apply_to_product_ids": 5,
+    "get_type": "cheapest",
+    "apply_to_cheapest": true
+  }
+}

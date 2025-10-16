@@ -1,0 +1,14 @@
+{
+  "code": "BUY2GET1",
+  "name": "Buy 2 Get 1 Free",
+  "description": "Buy any 2 items and get 1 free (cheapest item)",
+  "type": "buy_x_get_y_free",
+  "status": "active",
+  "conditions": {
+    "buy_quantity": 2,
+    "get_quantity": 1,
+    "apply_to_type": "any",
+    "get_type": "cheapest",
+    "apply_to_cheapest": true
+  }
+}

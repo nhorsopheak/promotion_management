@@ -1,0 +1,12 @@
+{
+  "code": "SAVE20",
+  "name": "Save 20% on Everything",
+  "description": "Get 20% off on all products",
+  "type": "percentage_discount",
+  "status": "active",
+  "conditions": {
+    "discount_type": "percentage",
+    "discount_value": 20,
+    "apply_to_type": "all"
+  }
+}

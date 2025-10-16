@@ -1,0 +1,13 @@
+{
+  "code": "BUNDLE3SNACKS",
+  "name": "3 Snacks for $10",
+  "description": "Buy 3 snacks from the snacks category for $10",
+  "type": "fixed_price_bundle",
+  "status": "active",
+  "conditions": {
+    "bundle_quantity": 3,
+    "bundle_price": 10.00,
+    "bundle_type": "specific_categories",
+    "eligible_category_ids": 5
+  }
+}

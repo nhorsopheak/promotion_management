@@ -1,0 +1,13 @@
+{
+  "code": "CLOTHING25",
+  "name": "25% Off Clothing",
+  "description": "Get 25% off on all clothing items",
+  "type": "percentage_discount",
+  "status": "active",
+  "conditions": {
+    "discount_type": "percentage",
+    "discount_value": 25,
+    "apply_to_type": "specific_categories",
+    "eligible_category_ids": [1, 2]
+  }
+}
