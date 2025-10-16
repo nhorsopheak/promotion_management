@@ -2,14 +2,35 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\POSController;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+// Redirect root to admin panel
+Route::get('/', function () {
+    return redirect('/admin');
+});
+
+// Debug route to test admin access
+Route::get('/debug-redirect', function () {
+    return response()->json([
+        'message' => 'Debug route working',
+        'user' => auth()->user() ? auth()->user()->name : 'Not authenticated',
+        'intended_url' => session()->get('url.intended'),
+        'admin_url' => '/admin',
+    ]);
+});
 
 // Health check endpoint for Render
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()]);
+});
+
+// POS Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
+    Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
+    Route::get('/pos/products', [POSController::class, 'getProducts'])->name('pos.products');
+    Route::get('/pos/customers', [POSController::class, 'getCustomers'])->name('pos.customers');
+    Route::get('/pos/promotions', [POSController::class, 'getPromotions'])->name('pos.promotions');
 });
 
 // Debug authentication status

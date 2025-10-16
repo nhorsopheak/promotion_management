@@ -188,7 +188,8 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                // Edit disabled - Orders are created from POS only
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -209,9 +210,21 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
+            // Create disabled - Orders are created from POS only
+            // 'create' => Pages\CreateOrder::route('/create'),
             'view' => Pages\ViewOrder::route('/{record}'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
+            // Edit disabled - Orders are created from POS only
+            // 'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return false; // Disable create - orders are created from POS only
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false; // Disable edit - orders are created from POS only
     }
 }
