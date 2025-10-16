@@ -38,13 +38,13 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Create categories
+        // Create medicine categories
         $categories = [
-            ['name' => 'Electronics', 'slug' => 'electronics'],
-            ['name' => 'Clothing', 'slug' => 'clothing'],
-            ['name' => 'Skincare', 'slug' => 'skincare'],
-            ['name' => 'Makeup', 'slug' => 'makeup'],
-            ['name' => 'Food & Beverages', 'slug' => 'food-beverages'],
+            ['name' => 'Pain Relief', 'slug' => 'pain-relief'],
+            ['name' => 'Cold & Flu', 'slug' => 'cold-flu'],
+            ['name' => 'Vitamins & Supplements', 'slug' => 'vitamins-supplements'],
+            ['name' => 'Digestive Health', 'slug' => 'digestive-health'],
+            ['name' => 'First Aid', 'slug' => 'first-aid'],
         ];
 
         foreach ($categories as $categoryData) {
@@ -58,20 +58,23 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Create products
+        // Create medicine products
         $products = [
-            ['name' => 'Laptop', 'category' => 'Electronics', 'price' => 999.99, 'sku' => 'ELEC-001'],
-            ['name' => 'Smartphone', 'category' => 'Electronics', 'price' => 699.99, 'sku' => 'ELEC-002'],
-            ['name' => 'Headphones', 'category' => 'Electronics', 'price' => 149.99, 'sku' => 'ELEC-003'],
-            ['name' => 'T-Shirt', 'category' => 'Clothing', 'price' => 19.99, 'sku' => 'CLO-001'],
-            ['name' => 'Jeans', 'category' => 'Clothing', 'price' => 49.99, 'sku' => 'CLO-002'],
-            ['name' => 'Sneakers', 'category' => 'Clothing', 'price' => 79.99, 'sku' => 'CLO-003'],
-            ['name' => 'Face Cream', 'category' => 'Skincare', 'price' => 29.99, 'sku' => 'SKIN-001'],
-            ['name' => 'Cleanser', 'category' => 'Skincare', 'price' => 19.99, 'sku' => 'SKIN-002'],
-            ['name' => 'Serum', 'category' => 'Skincare', 'price' => 39.99, 'sku' => 'SKIN-003'],
-            ['name' => 'Lipstick', 'category' => 'Makeup', 'price' => 15.99, 'sku' => 'MAKE-001'],
-            ['name' => 'Foundation', 'category' => 'Makeup', 'price' => 34.99, 'sku' => 'MAKE-002'],
-            ['name' => 'Mascara', 'category' => 'Makeup', 'price' => 12.99, 'sku' => 'MAKE-003'],
+            ['name' => 'Paracetamol 500mg', 'category' => 'Pain Relief', 'price' => 5.99, 'sku' => 'PAIN-001'],
+            ['name' => 'Ibuprofen 400mg', 'category' => 'Pain Relief', 'price' => 7.99, 'sku' => 'PAIN-002'],
+            ['name' => 'Aspirin 100mg', 'category' => 'Pain Relief', 'price' => 6.49, 'sku' => 'PAIN-003'],
+            ['name' => 'Cold & Flu Relief Tablets', 'category' => 'Cold & Flu', 'price' => 8.99, 'sku' => 'COLD-001'],
+            ['name' => 'Cough Syrup 200ml', 'category' => 'Cold & Flu', 'price' => 12.99, 'sku' => 'COLD-002'],
+            ['name' => 'Throat Lozenges', 'category' => 'Cold & Flu', 'price' => 4.99, 'sku' => 'COLD-003'],
+            ['name' => 'Vitamin C 1000mg', 'category' => 'Vitamins & Supplements', 'price' => 15.99, 'sku' => 'VIT-001'],
+            ['name' => 'Multivitamin Complex', 'category' => 'Vitamins & Supplements', 'price' => 24.99, 'sku' => 'VIT-002'],
+            ['name' => 'Omega-3 Fish Oil', 'category' => 'Vitamins & Supplements', 'price' => 19.99, 'sku' => 'VIT-003'],
+            ['name' => 'Antacid Tablets', 'category' => 'Digestive Health', 'price' => 6.99, 'sku' => 'DIG-001'],
+            ['name' => 'Probiotic Capsules', 'category' => 'Digestive Health', 'price' => 22.99, 'sku' => 'DIG-002'],
+            ['name' => 'Laxative Syrup', 'category' => 'Digestive Health', 'price' => 9.99, 'sku' => 'DIG-003'],
+            ['name' => 'Adhesive Bandages (Pack of 50)', 'category' => 'First Aid', 'price' => 3.99, 'sku' => 'AID-001'],
+            ['name' => 'Antiseptic Cream 30g', 'category' => 'First Aid', 'price' => 5.49, 'sku' => 'AID-002'],
+            ['name' => 'Gauze Pads (Pack of 10)', 'category' => 'First Aid', 'price' => 4.49, 'sku' => 'AID-003'],
         ];
 
         foreach ($products as $productData) {
@@ -92,16 +95,16 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Get categories and products for promotions
-        $clothingCategory = Category::where('name', 'Clothing')->first();
-        $skincareCategory = Category::where('name', 'Skincare')->first();
+        // Get categories for promotions
+        $painReliefCategory = Category::where('name', 'Pain Relief')->first();
+        $vitaminsCategory = Category::where('name', 'Vitamins & Supplements')->first();
         
-        // 1. Buy X Get Y Free - Clothing
+        // 1. Buy X Get Y Free - Pain Relief
         Promotion::updateOrCreate(
             ['code' => 'BUY2GET1'],
             [
-                'name' => 'Buy 2 Get 1 Free - Clothing',
-                'description' => 'Buy any 2 clothing items and get 1 free! The cheapest item will be free.',
+                'name' => 'Buy 2 Get 1 Free - Pain Relief',
+                'description' => 'Buy any 2 pain relief medicines and get 1 free! The cheapest item will be free.',
                 'type' => PromotionType::BUY_X_GET_Y_FREE->value,
                 'status' => PromotionStatus::ACTIVE->value,
                 'start_date' => now(),
@@ -110,7 +113,7 @@ class DatabaseSeeder extends Seeder
                     'buy_quantity' => 2,
                     'get_quantity' => 1,
                     'apply_to_type' => 'specific_categories',
-                    'apply_to_category_ids' => $clothingCategory->id,
+                    'apply_to_category_ids' => $painReliefCategory->id,
                     'get_type' => 'cheapest',
                     'apply_to_cheapest' => true,
                 ],
@@ -139,21 +142,21 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Fixed Price Bundle - Skincare
+        // 3. Fixed Price Bundle - Vitamins
         Promotion::updateOrCreate(
-            ['code' => 'SKINCARE_BUNDLE'],
+            ['code' => 'VITAMIN_BUNDLE'],
             [
-                'name' => 'Skincare Bundle - 3 for $30',
-                'description' => 'Buy any 3 skincare products for just $30! Discount split proportionally.',
+                'name' => 'Vitamin Bundle - 3 for $50',
+                'description' => 'Buy any 3 vitamins & supplements for just $50! Discount split proportionally.',
                 'type' => PromotionType::FIXED_PRICE_BUNDLE->value,
                 'status' => PromotionStatus::ACTIVE->value,
                 'start_date' => now(),
                 'end_date' => now()->addMonth(),
                 'conditions' => [
                     'bundle_quantity' => 3,
-                    'bundle_price' => 30.00,
+                    'bundle_price' => 50.00,
                     'bundle_type' => 'specific_categories',
-                    'eligible_category_ids' => $skincareCategory->id,
+                    'eligible_category_ids' => $vitaminsCategory->id,
                 ],
                 'benefits' => [],
             ]
@@ -164,8 +167,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('User: test@example.com / password');
         $this->command->info('');
         $this->command->info('Sample Promotions Created:');
-        $this->command->info('1. BUY2GET1 - Buy 2 Get 1 Free (Clothing)');
+        $this->command->info('1. BUY2GET1 - Buy 2 Get 1 Free (Pain Relief)');
         $this->command->info('2. STEP_DISCOUNT - Progressive discounts by position');
-        $this->command->info('3. SKINCARE_BUNDLE - 3 Skincare items for $30');
+        $this->command->info('3. VITAMIN_BUNDLE - 3 Vitamins for $50');
     }
 }
