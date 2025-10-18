@@ -52,13 +52,11 @@ class PromotionResource extends Resource
                         Forms\Components\Select::make('type')
                             ->required()
                             ->options(PromotionType::options())
-                            ->reactive()
-                            ->afterStateUpdated(fn($state, callable $set) => $set('conditions', [])),
-
-                        Forms\Components\Select::make('status')
-                            ->required()
-                            ->options(PromotionStatus::options())
-                            ->default(PromotionStatus::ACTIVE->value),
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Clear all conditions when promotion type changes
+                                $set('conditions', []);
+                            }),
 
                         Forms\Components\Textarea::make('description')
                             ->maxLength(65535)
@@ -78,24 +76,36 @@ class PromotionResource extends Resource
 
                 Forms\Components\Section::make('Buy X Get Y Free Configuration')
                     ->schema([
-                        Forms\Components\TextInput::make('conditions.buy_quantity')
-                            ->label('Buy Quantity (X)')
-                            ->numeric()
-                            ->required()
-                            ->default(2)
-                            ->minValue(1)
-                            ->helperText('Number of items customer must buy'),
+                        Forms\Components\Section::make('Quantity Configuration')
+                            ->schema([
+                                Forms\Components\Group::make([
+                                    Forms\Components\TextInput::make('conditions.buy_quantity')
+                                        ->label('Buy Quantity (X)')
+                                        ->numeric()
+                                        ->required()
+                                        ->default(2)
+                                        ->minValue(1)
+                                        ->helperText('Items to buy')
+                                        ->columnSpan(1),
 
-                        Forms\Components\TextInput::make('conditions.get_quantity')
-                            ->label('Get Free Quantity (Y)')
-                            ->numeric()
-                            ->required()
-                            ->default(1)
-                            ->minValue(1)
-                            ->helperText('Number of free items customer gets'),
+                                    Forms\Components\TextInput::make('conditions.get_quantity')
+                                        ->label('Get Free Quantity (Y)')
+                                        ->numeric()
+                                        ->required()
+                                        ->default(1)
+                                        ->minValue(1)
+                                        ->helperText('Free items to get')
+                                        ->columnSpan(1),
+                                ])
+                                ->columns(2)
+                                ->columnSpanFull(),
+                            ])
+                            ->compact()
+                            ->columnSpanFull(),
 
                         // Apply To Options
                         Forms\Components\Section::make('Apply To')
+                            ->description('Configure which products qualify for this promotion')
                             ->schema([
                                 Forms\Components\Radio::make('conditions.apply_to_type')
                                     ->label('Apply promotion to:')
@@ -105,15 +115,52 @@ class PromotionResource extends Resource
                                         'specific_categories' => 'Specific categories',
                                     ])
                                     ->default('any')
-                                    ->reactive()
+                                    ->live()
                                     ->columnSpanFull(),
 
-                                Forms\Components\Select::make('conditions.apply_to_product_ids')
-                                    ->label('Specific Product to Buy')
-                                    ->options(Product::where('is_active', true)->pluck('name', 'id'))
-                                    ->helperText('Select specific product that can be bought to qualify')
-                                    ->visible(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_products')
-                                    ->required(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_products'),
+                                Forms\Components\Group::make([
+                                    Forms\Components\Select::make('conditions.apply_to_product_ids')
+                                        ->label('Product')
+                                        ->options(Product::where('is_active', true)->pluck('name', 'id'))
+                                        ->helperText('Select specific product to buy')
+                                        ->required()
+                                        ->live()
+                                        ->columnSpan(2),
+
+                                    Forms\Components\Select::make('conditions.apply_to_lot_number')
+                                        ->label('Lot Number')
+                                        ->options(function (Forms\Get $get) {
+                                            $productId = $get('conditions.apply_to_product_ids');
+                                            if (!$productId) return [];
+                                            
+                                            return Product::where('id', $productId)
+                                                ->whereNotNull('lot_number')
+                                                ->pluck('lot_number', 'lot_number')
+                                                ->unique()
+                                                ->toArray();
+                                        })
+                                        ->helperText('Optional')
+                                        ->live()
+                                        ->columnSpan(1),
+
+                                    Forms\Components\Select::make('conditions.apply_to_unit')
+                                        ->label('Unit')
+                                        ->options(function (Forms\Get $get) {
+                                            $productId = $get('conditions.apply_to_product_ids');
+                                            if (!$productId) return [];
+                                            
+                                            return Product::where('id', $productId)
+                                                ->pluck('unit', 'unit')
+                                                ->unique()
+                                                ->toArray();
+                                        })
+                                        ->helperText('Unit type')
+                                        ->live()
+                                        ->columnSpan(1),
+                                ])
+                                ->columns(4)
+                                ->visible(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_products')
+                                ->columnSpanFull(),
 
                                 Forms\Components\Select::make('conditions.apply_to_category_ids')
                                     ->label('Specific Category to Buy From')
@@ -122,10 +169,12 @@ class PromotionResource extends Resource
                                     ->visible(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_categories')
                                     ->required(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_categories'),
                             ])
+                            ->compact()
                             ->columnSpanFull(),
 
                         // Get For Options
                         Forms\Components\Section::make('Get Free')
+                            ->description('Configure which products will be given for free')
                             ->schema([
                                 Forms\Components\Radio::make('conditions.get_type')
                                     ->label('Get free:')
@@ -134,15 +183,52 @@ class PromotionResource extends Resource
                                         'specific_products' => 'Specific products',
                                     ])
                                     ->default('cheapest')
-                                    ->reactive()
+                                    ->live()
                                     ->columnSpanFull(),
 
-                                Forms\Components\Select::make('conditions.get_product_ids')
-                                    ->label('Specific Product to Get Free')
-                                    ->options(Product::where('is_active', true)->pluck('name', 'id'))
-                                    ->helperText('Select specific product that will be given free')
-                                    ->visible(fn(Forms\Get $get) => $get('conditions.get_type') === 'specific_products')
-                                    ->required(fn(Forms\Get $get) => $get('conditions.get_type') === 'specific_products'),
+                                Forms\Components\Group::make([
+                                    Forms\Components\Select::make('conditions.get_product_ids')
+                                        ->label('Product')
+                                        ->options(Product::where('is_active', true)->pluck('name', 'id'))
+                                        ->helperText('Select product to get free')
+                                        ->required()
+                                        ->live()
+                                        ->columnSpan(2),
+
+                                    Forms\Components\Select::make('conditions.get_lot_number')
+                                        ->label('Lot Number')
+                                        ->options(function (Forms\Get $get) {
+                                            $productId = $get('conditions.get_product_ids');
+                                            if (!$productId) return [];
+                                            
+                                            return Product::where('id', $productId)
+                                                ->whereNotNull('lot_number')
+                                                ->pluck('lot_number', 'lot_number')
+                                                ->unique()
+                                                ->toArray();
+                                        })
+                                        ->helperText('Optional')
+                                        ->live()
+                                        ->columnSpan(1),
+
+                                    Forms\Components\Select::make('conditions.get_unit')
+                                        ->label('Unit')
+                                        ->options(function (Forms\Get $get) {
+                                            $productId = $get('conditions.get_product_ids');
+                                            if (!$productId) return [];
+                                            
+                                            return Product::where('id', $productId)
+                                                ->pluck('unit', 'unit')
+                                                ->unique()
+                                                ->toArray();
+                                        })
+                                        ->helperText('Unit type')
+                                        ->live()
+                                        ->columnSpan(1),
+                                ])
+                                ->columns(4)
+                                ->visible(fn(Forms\Get $get) => $get('conditions.get_type') === 'specific_products')
+                                ->columnSpanFull(),
 
                                 Forms\Components\Toggle::make('conditions.apply_to_cheapest')
                                     ->label('Apply to Cheapest Items')
@@ -151,6 +237,7 @@ class PromotionResource extends Resource
                                     ->visible(fn(Forms\Get $get) => $get('conditions.get_type') === 'cheapest')
                                     ->columnSpanFull(),
                             ])
+                            ->compact()
                             ->columnSpanFull(),
                     ])
                     ->columns(1)
@@ -215,17 +302,17 @@ class PromotionResource extends Resource
                                 'specific_categories' => 'Specific category',
                             ])
                             ->default('any')
-                            ->reactive()
+                            ->live()
                             ->columnSpanFull(),
 
-                        Forms\Components\Select::make('conditions.eligible_product_ids')
+                        Forms\Components\Select::make('conditions.bundle_product_ids')
                             ->label('Eligible Product')
                             ->options(Product::where('is_active', true)->pluck('name', 'id'))
                             ->helperText('Select product eligible for bundle')
                             ->visible(fn(Forms\Get $get) => $get('conditions.bundle_type') === 'specific_products')
                             ->required(fn(Forms\Get $get) => $get('conditions.bundle_type') === 'specific_products'),
 
-                        Forms\Components\Select::make('conditions.eligible_category_ids')
+                        Forms\Components\Select::make('conditions.bundle_category_ids')
                             ->label('Eligible Category')
                             ->options(Category::where('is_active', true)->pluck('name', 'id'))
                             ->helperText('Select category eligible for bundle')
@@ -244,7 +331,7 @@ class PromotionResource extends Resource
                                 'fixed_amount' => 'Fixed Amount Off',
                             ])
                             ->default('percentage')
-                            ->reactive()
+                            ->live()
                             ->required()
                             ->columnSpanFull(),
 
@@ -259,7 +346,7 @@ class PromotionResource extends Resource
                                 : 'Fixed amount in dollars (e.g., 5.00 for $5 off)')
                             ->maxValue(fn(Forms\Get $get) => $get('conditions.discount_type') === 'percentage' ? 100 : null),
 
-                        Forms\Components\Radio::make('conditions.apply_to_type')
+                        Forms\Components\Radio::make('conditions.discount_apply_to_type')
                             ->label('Apply discount to:')
                             ->options([
                                 'all' => 'All products',
@@ -267,26 +354,59 @@ class PromotionResource extends Resource
                                 'specific_categories' => 'Specific categories',
                             ])
                             ->default('all')
-                            ->reactive()
+                            ->live()
                             ->columnSpanFull(),
 
-                        Forms\Components\Select::make('conditions.eligible_product_ids')
+                        Forms\Components\Repeater::make('conditions.discount_products')
                             ->label('Eligible Products')
-                            ->options(Product::where('is_active', true)->pluck('name', 'id'))
-                            ->multiple()
-                            ->helperText('Select specific products eligible for discount')
-                            ->visible(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_products')
-                            ->required(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_products'),
+                            ->schema([
+                                Forms\Components\Select::make('product_id')
+                                    ->label('Product')
+                                    ->options(Product::where('is_active', true)->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        if ($state) {
+                                            $product = Product::find($state);
+                                            if ($product && $product->unit) {
+                                                $set('unit', $product->unit);
+                                            }
+                                        }
+                                    })
+                                    ->columnSpan(2),
 
-                        Forms\Components\Select::make('conditions.eligible_category_ids')
+                                Forms\Components\TextInput::make('unit')
+                                    ->label('Unit')
+                                    ->default('pcs')
+                                    ->columnSpan(1),
+
+                                Forms\Components\TextInput::make('min_quantity')
+                                    ->label('Min Qty')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->minValue(1)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(4)
+                            ->defaultItems(1)
+                            ->addActionLabel('Add Product')
+                            ->deleteAction(
+                                fn($action) => $action->requiresConfirmation()
+                            )
+                            ->visible(fn(Forms\Get $get) => $get('conditions.discount_apply_to_type') === 'specific_products')
+                            ->columnSpanFull(),
+
+                        Forms\Components\Select::make('conditions.discount_category_ids')
                             ->label('Eligible Categories')
                             ->options(Category::where('is_active', true)->pluck('name', 'id'))
                             ->multiple()
+                            ->searchable()
                             ->helperText('Select specific categories eligible for discount')
-                            ->visible(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_categories')
-                            ->required(fn(Forms\Get $get) => $get('conditions.apply_to_type') === 'specific_categories'),
+                            ->visible(fn(Forms\Get $get) => $get('conditions.discount_apply_to_type') === 'specific_categories')
+                            ->columnSpanFull(),
                     ])
-                    ->columns(2)
+                    ->columns(1)
                     ->visible(fn(Forms\Get $get) => $get('type') === PromotionType::PERCENTAGE_DISCOUNT->value),
             ]);
     }

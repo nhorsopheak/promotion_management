@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use App\Enums\PromotionStatus;
 
 class Promotion extends Model
 {
@@ -36,6 +37,17 @@ class Promotion extends Model
         'conditions' => 'array',
         'benefits' => 'array',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($promotion) {
+            if (empty($promotion->status)) {
+                $promotion->status = PromotionStatus::ACTIVE->value;
+            }
+        });
+    }
 
     public function promotionProducts(): HasMany
     {

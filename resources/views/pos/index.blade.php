@@ -353,6 +353,19 @@
             text-decoration: line-through;
         }
 
+        .original-price {
+            text-decoration: line-through !important;
+            color: #9ca3af !important;
+            font-size: 0.875rem !important;
+            font-weight: 400 !important;
+        }
+
+        .discounted-price {
+            color: #10b981 !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+        }
+
         .free-badge {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -675,6 +688,7 @@
             // Promotion select
             document.getElementById('promotion-select').addEventListener('change', function(e) {
                 selectedPromotion = e.target.value ? JSON.parse(e.target.options[e.target.selectedIndex].dataset.promotion) : null;
+                console.log('Promotion selected:', selectedPromotion);
                 updateCart();
             });
 
@@ -790,22 +804,74 @@
                 }
 
                 // Show regular cart items
-                cartHTML += cart.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-header">
-                            <div class="cart-item-name">${item.name}</div>
-                            <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">×</button>
-                        </div>
-                        <div class="cart-item-controls">
-                            <div class="quantity-control">
-                                <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">−</button>
-                                <span class="qty-display">${item.quantity}</span>
-                                <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                cartHTML += cart.map(item => {
+                    const originalTotal = item.price * item.quantity;
+                    let discountedPrice = item.price;
+                    let hasDiscount = false;
+                    
+                    // Check if this item has a discount from promotion
+                    if (selectedPromotion && selectedPromotion.type === 'percentage_discount') {
+                        const benefits = selectedPromotion.benefits || {};
+                        const percentage = benefits.discount_percentage || 0;
+                        discountedPrice = item.price * (1 - percentage / 100);
+                        hasDiscount = percentage > 0;
+                        console.log(`Percentage discount: ${percentage}%, original: $${item.price}, discounted: $${discountedPrice}`);
+                    } else if (selectedPromotion && selectedPromotion.type === 'fixed_amount_discount') {
+                        const benefits = selectedPromotion.benefits || {};
+                        const fixedDiscount = benefits.discount_amount || 0;
+                        const totalItems = cart.reduce((sum, cartItem) => sum + cartItem.quantity, 0);
+                        const discountPerItem = fixedDiscount / totalItems;
+                        discountedPrice = Math.max(0, item.price - discountPerItem);
+                        hasDiscount = fixedDiscount > 0;
+                        console.log(`Fixed discount: $${fixedDiscount}, per item: $${discountPerItem}, original: $${item.price}, discounted: $${discountedPrice}`);
+                    } else if (selectedPromotion && selectedPromotion.type === 'step_discount') {
+                        const conditions = selectedPromotion.conditions || {};
+                        const discountTiers = conditions.discount_tiers || {};
+                        
+                        // Calculate discount based on quantity tiers
+                        let applicableDiscount = 0;
+                        for (const [minQty, discountPercent] of Object.entries(discountTiers)) {
+                            if (item.quantity >= parseInt(minQty)) {
+                                applicableDiscount = Math.max(applicableDiscount, parseFloat(discountPercent));
+                            }
+                        }
+                        
+                        if (applicableDiscount > 0) {
+                            discountedPrice = item.price * (1 - applicableDiscount / 100);
+                            hasDiscount = true;
+                            console.log(`Step discount: ${applicableDiscount}% for qty ${item.quantity}, original: $${item.price}, discounted: $${discountedPrice}`);
+                        }
+                    }
+                    
+                    const discountedTotal = discountedPrice * item.quantity;
+                    console.log(`Item: ${item.name}, hasDiscount: ${hasDiscount}, original: $${originalTotal}, discounted: $${discountedTotal}`);
+                    
+                    return `
+                        <div class="cart-item">
+                            <div class="cart-item-header">
+                                <div class="cart-item-name">${item.name}</div>
+                                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">×</button>
                             </div>
-                            <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                            <div class="cart-item-controls">
+                                <div class="quantity-control">
+                                    <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">−</button>
+                                    <span class="qty-display">${item.quantity}</span>
+                                    <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                                </div>
+                                <div class="cart-item-price">
+                                    ${hasDiscount ? `
+                                        <div class="original-price">
+                                            $${originalTotal.toFixed(2)}
+                                        </div>
+                                        <div class="discounted-price">
+                                            $${discountedTotal.toFixed(2)}
+                                        </div>
+                                    ` : `$${originalTotal.toFixed(2)}`}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 // Show free items section
                 if (freeItems.length > 0) {
@@ -831,13 +897,48 @@
                 cartItemsContainer.innerHTML = cartHTML;
                 document.getElementById('checkout-btn').disabled = false;
 
-                // Calculate totals
+                // Calculate totals with proper discount handling
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const tax = (subtotal - discount) * 0.1; // 10% tax on discounted amount
-                const total = subtotal - discount + tax;
+                
+                // Calculate actual discounted amount for display
+                let actualDiscountedSubtotal = subtotal;
+                if (selectedPromotion && selectedPromotion.type === 'percentage_discount') {
+                    const benefits = selectedPromotion.benefits || {};
+                    const percentage = benefits.discount_percentage || 0;
+                    actualDiscountedSubtotal = subtotal * (1 - percentage / 100);
+                } else if (selectedPromotion && selectedPromotion.type === 'fixed_amount_discount') {
+                    const benefits = selectedPromotion.benefits || {};
+                    const fixedDiscount = benefits.discount_amount || 0;
+                    actualDiscountedSubtotal = Math.max(0, subtotal - fixedDiscount);
+                } else if (selectedPromotion && selectedPromotion.type === 'step_discount') {
+                    // Calculate step discount total
+                    actualDiscountedSubtotal = 0;
+                    cart.forEach(item => {
+                        const conditions = selectedPromotion.conditions || {};
+                        const discountTiers = conditions.discount_tiers || {};
+                        
+                        let applicableDiscount = 0;
+                        for (const [minQty, discountPercent] of Object.entries(discountTiers)) {
+                            if (item.quantity >= parseInt(minQty)) {
+                                applicableDiscount = Math.max(applicableDiscount, parseFloat(discountPercent));
+                            }
+                        }
+                        
+                        const discountedPrice = applicableDiscount > 0 ? 
+                            item.price * (1 - applicableDiscount / 100) : item.price;
+                        actualDiscountedSubtotal += discountedPrice * item.quantity;
+                    });
+                } else {
+                    // For buy_x_get_y_free, use the original discount calculation
+                    actualDiscountedSubtotal = subtotal - discount;
+                }
+                
+                const finalDiscount = subtotal - actualDiscountedSubtotal;
+                const tax = actualDiscountedSubtotal * 0.1; // 10% tax on discounted amount
+                const total = actualDiscountedSubtotal + tax;
 
                 document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-                document.getElementById('discount').textContent = `$${discount.toFixed(2)}`;
+                document.getElementById('discount').textContent = `$${finalDiscount.toFixed(2)}`;
                 document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
                 document.getElementById('total').textContent = `$${total.toFixed(2)}`;
             }
@@ -876,11 +977,46 @@
             checkoutBtn.textContent = '⏳ Processing...';
 
             try {
-                // Calculate totals and free items
+                // Calculate totals and free items using the same logic as display
                 const { freeItems, discount } = calculatePromotionBenefits();
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const taxAmount = (subtotal - discount) * 0.1;
-                const total = subtotal - discount + taxAmount;
+                
+                // Calculate actual discounted amount (same as display logic)
+                let actualDiscountedSubtotal = subtotal;
+                if (selectedPromotion && selectedPromotion.type === 'percentage_discount') {
+                    const benefits = selectedPromotion.benefits || {};
+                    const percentage = benefits.discount_percentage || 0;
+                    actualDiscountedSubtotal = subtotal * (1 - percentage / 100);
+                } else if (selectedPromotion && selectedPromotion.type === 'fixed_amount_discount') {
+                    const benefits = selectedPromotion.benefits || {};
+                    const fixedDiscount = benefits.discount_amount || 0;
+                    actualDiscountedSubtotal = Math.max(0, subtotal - fixedDiscount);
+                } else if (selectedPromotion && selectedPromotion.type === 'step_discount') {
+                    // Calculate step discount total (same logic as display)
+                    actualDiscountedSubtotal = 0;
+                    cart.forEach(item => {
+                        const conditions = selectedPromotion.conditions || {};
+                        const discountTiers = conditions.discount_tiers || {};
+                        
+                        let applicableDiscount = 0;
+                        for (const [minQty, discountPercent] of Object.entries(discountTiers)) {
+                            if (item.quantity >= parseInt(minQty)) {
+                                applicableDiscount = Math.max(applicableDiscount, parseFloat(discountPercent));
+                            }
+                        }
+                        
+                        const discountedPrice = applicableDiscount > 0 ? 
+                            item.price * (1 - applicableDiscount / 100) : item.price;
+                        actualDiscountedSubtotal += discountedPrice * item.quantity;
+                    });
+                } else {
+                    // For buy_x_get_y_free, use the original discount calculation
+                    actualDiscountedSubtotal = subtotal - discount;
+                }
+                
+                const finalDiscount = subtotal - actualDiscountedSubtotal;
+                const taxAmount = actualDiscountedSubtotal * 0.1;
+                const total = actualDiscountedSubtotal + taxAmount;
 
                 const response = await fetch('/pos/checkout', {
                     method: 'POST',
@@ -903,7 +1039,7 @@
                         customer_name: selectedCustomer?.name,
                         customer_email: selectedCustomer?.email,
                         promotion_id: selectedPromotion?.id,
-                        discount_amount: discount,
+                        discount_amount: finalDiscount,
                         tax_amount: taxAmount,
                         subtotal: subtotal,
                         total: total,
@@ -914,7 +1050,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert(`✅ Order ${data.order.order_number} created successfully!\n\nSubtotal: $${subtotal.toFixed(2)}\nDiscount: $${discount.toFixed(2)}\nTax: $${taxAmount.toFixed(2)}\nTotal: $${total.toFixed(2)}`);
+                    alert(`✅ Order ${data.order.order_number} created successfully!\n\nSubtotal: $${subtotal.toFixed(2)}\nDiscount: $${finalDiscount.toFixed(2)}\nTax: $${taxAmount.toFixed(2)}\nTotal: $${total.toFixed(2)}`);
                     // Reset cart
                     cart = [];
                     selectedCustomer = null;
